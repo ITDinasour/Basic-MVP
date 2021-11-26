@@ -1,2 +1,3 @@
+include ':basicmvp'
 include ':app'
 rootProject.name = "BasicMvpDemoApplication"
