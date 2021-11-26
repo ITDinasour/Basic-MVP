@@ -18,10 +18,14 @@ interface BasicMvpController {
         protected var isDestroy = false
 
         init {
+            initDataBeforeAddObserver()
             if (mView is LifecycleOwner) {
                 mView.lifecycle.addObserver(this@MvpPresenterImp)
             }
             mModel = getModel()
+        }
+
+        protected open fun initDataBeforeAddObserver() {
         }
 
         abstract fun getModel(): M
