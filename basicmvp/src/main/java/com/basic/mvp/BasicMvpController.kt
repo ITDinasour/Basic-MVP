@@ -16,7 +16,6 @@ interface BasicMvpController {
         MvpPresenter, LifecycleObserver {
         protected var mModel: M
         protected var isDestroy = false
-        protected val mContext by lazy { mView }
 
         init {
             if (mView is LifecycleOwner) {
