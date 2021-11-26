@@ -15,5 +15,6 @@
  ```kotlin 
  	dependencies {
  	        implementation 'com.github.ITDinasour:Basic-MVP:0.1'
+            implementation 'com.github.ITDinasour:Basic-WithButterknife:0.1.1'//结合基础构建服务
  	}
 ```  
