@@ -13,8 +13,8 @@ import com.basic.withoutbinding.BasicView
 interface BaseMvpController : BasicMvpController {
 
     abstract class MvpPresenterImp<V : MvpView, M : BaseMvpModel>(mView: V) :
-        BasicMvpController.MvpPresenterImp<V, M>(mView),MvpPresenter {
-        protected val mContext by lazy { mView.getContext() }
+        BasicMvpController.MvpPresenterImp<V, M>(mView), MvpPresenter {
+        protected val mContext by lazy(LazyThreadSafetyMode.PUBLICATION) { mView.getContext() }
 
         init {
             if (mView !is LifecycleOwner) {

@@ -14,7 +14,7 @@ interface MainController : BaseMvpController {
     class MvpPresenterImp(mView: MvpView) :
         BaseMvpController.MvpPresenterImp<MvpView, BaseMvpModel>(mView) ,MvpPresenter{
         override fun getModel(): BaseMvpModel {
-            return BaseMvpModel(mContext)
+            return BaseMvpModel(mView.getContext())
         }
     }
 
