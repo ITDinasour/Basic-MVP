@@ -13,18 +13,18 @@ import androidx.lifecycle.OnLifecycleEvent
  */
 interface BasicMvpController {
     abstract class MvpPresenterImp<V : MvpView, M : BasicMvpModel>(protected val mView: V) :
-            MvpPresenter, LifecycleObserver {
+        MvpPresenter, LifecycleObserver {
         protected var mModel: M
         protected var isDestroy = false
 
         init {
             if (mView is LifecycleOwner) {
-                mView.lifecycle.addObserver(this@MvpPresenterImp)
+                mView.lifecycle.addObserver(this)
             }
-            mModel = getModel()
+            mModel = initModel()
         }
 
-        abstract fun getModel(): M
+        abstract fun initModel(): M
 
         @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         override fun onDestroy() {

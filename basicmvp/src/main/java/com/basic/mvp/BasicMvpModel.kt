@@ -23,7 +23,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
  */
 open class BasicMvpModel(context: Context?) : LifecycleObserver {
     protected val rxManager: RxManager =
-            RxManager()
+        RxManager()
 
     init {
         context?.run {
@@ -34,62 +34,63 @@ open class BasicMvpModel(context: Context?) : LifecycleObserver {
     }
 
     protected fun <T> singleActionOnRxIoMainThread(
-            actionDo: ((SingleEmitterProxy<T>) -> Unit),
-            successAction: ((T) -> Unit)? = null,
-            errorAction: ((Throwable) -> Unit)? = null,
-            subscribeAction: ((DisposableProxy) -> Unit)? = null
+        actionDo: ((SingleEmitterProxy<T>) -> Unit),
+        successAction: ((T) -> Unit)? = null,
+        errorAction: ((Throwable) -> Unit)? = null,
+        subscribeAction: ((DisposableProxy) -> Unit)? = null
     ) {
         SingleCreate.create<T> {
             actionDo(SingleEmitterProxy(it))
-        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(object : BasicRxSingleObserver<T>(rxManager) {
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : BasicRxSingleObserver<T>(rxManager) {
 
-            override fun onSubscribe(d: Disposable) {
-                super.onSubscribe(d)
-                subscribeAction?.invoke(DisposableProxy(d))
-            }
+                override fun onSubscribe(d: Disposable) {
+                    super.onSubscribe(d)
+                    subscribeAction?.invoke(DisposableProxy(d))
+                }
 
-            override fun onSuccess(data: T) {
-                super.onSuccess(data)
-                successAction?.invoke(data)
-            }
+                override fun onSuccess(data: T) {
+                    super.onSuccess(data)
+                    successAction?.invoke(data)
+                }
 
-            override fun onError(e: Throwable) {
-                super.onError(e)
-                errorAction?.invoke(e)
-            }
-        })
+                override fun onError(e: Throwable) {
+                    super.onError(e)
+                    errorAction?.invoke(e)
+                }
+            })
     }
 
     protected fun <T> observeActionOnRxIoMainThread(
-            actionDo: ((ObservableEmitterProxy<T>) -> Unit),
-            next: ((T) -> Unit)? = null,
-            error: ((Throwable) -> Unit)? = null,
-            complete: (() -> Unit)? = null,
-            subscribe: ((DisposableProxy) -> Unit)? = null
+        actionDo: ((ObservableEmitterProxy<T>) -> Unit),
+        next: ((T) -> Unit)? = null,
+        error: ((Throwable) -> Unit)? = null,
+        complete: (() -> Unit)? = null,
+        subscribe: ((DisposableProxy) -> Unit)? = null
     ) {
         ObservableCreate.create(ObservableOnSubscribe<T> {
             actionDo(ObservableEmitterProxy(it))
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : BasicRxObserver<T>(rxManager) {
-                    override fun onSubscribe(d: Disposable) {
-                        super.onSubscribe(d)
-                        subscribe?.invoke(DisposableProxy(d))
-                    }
+            .subscribe(object : BasicRxObserver<T>(rxManager) {
+                override fun onSubscribe(d: Disposable) {
+                    super.onSubscribe(d)
+                    subscribe?.invoke(DisposableProxy(d))
+                }
 
-                    override fun onNext(data: T) {
-                        next?.invoke(data)
-                    }
+                override fun onNext(data: T) {
+                    next?.invoke(data)
+                }
 
-                    override fun onComplete() {
-                        super.onComplete()
-                        complete?.invoke()
-                    }
+                override fun onComplete() {
+                    super.onComplete()
+                    complete?.invoke()
+                }
 
-                    override fun onError(e: Throwable) {
-                        super.onError(e)
-                        error?.invoke(e)
-                    }
-                })
+                override fun onError(e: Throwable) {
+                    super.onError(e)
+                    error?.invoke(e)
+                }
+            })
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -121,7 +122,7 @@ open class BasicMvpModel(context: Context?) : LifecycleObserver {
         fun setCancellable(c: Cancellable?) = emitter.setCancellable(c)
         fun setDisposable(d: Disposable?) = emitter.setDisposable(d)
         fun serialize(): ObservableEmitterProxy<T> =
-                ObservableEmitterProxy(emitter.serialize())
+            ObservableEmitterProxy(emitter.serialize())
 
         fun onNext(value: T) = emitter.onNext(value)
         fun onError(error: Throwable) = emitter.onError(error)
