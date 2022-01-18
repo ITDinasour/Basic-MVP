@@ -14,11 +14,11 @@ class RxManager {
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun add(d: Disposable?) {
-        compositeDisposable.add(d)
+        d?.apply {compositeDisposable.add(this)}
     }
 
     fun remove(d: Disposable?) {
-        compositeDisposable.remove(d)
+        d?.apply {compositeDisposable.remove(this)}
     }
 
     fun clear() {

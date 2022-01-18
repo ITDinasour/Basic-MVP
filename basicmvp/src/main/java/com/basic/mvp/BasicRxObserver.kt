@@ -9,32 +9,22 @@ import io.reactivex.rxjava3.disposables.Disposable
  *    @desc   :
  *    @version: 1.0
  */
-abstract class BasicRxObserver<T> : Observer<T> {
-    private var rxManager: RxManager? = null;
-    private lateinit var disposable: Disposable;
-
-    constructor() {}
-    constructor(rxManager: RxManager) {
-        this.rxManager = rxManager;
-    }
+abstract class BasicRxObserver<T>(private var rxManager: RxManager?) : Observer<T> {
+    protected var disposable: Disposable?=null
 
     override fun onSubscribe(d: Disposable) {
         rxManager?.run {
             disposable = d
-            this.add(disposable)
+            add(disposable)
         }
     }
 
     override fun onComplete() {
-        rxManager?.run {
-            remove(disposable)
-        }
+        rxManager?.remove(disposable)
     }
 
     override fun onError(e: Throwable) {
-        rxManager?.run {
-            remove(disposable)
-        }
+        rxManager?.remove(disposable)
     }
 
     class NullThrowable(message: String?) : Throwable(message) {

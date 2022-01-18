@@ -33,72 +33,111 @@ open class BasicMvpModel(context: Context?) : LifecycleObserver {
         }
     }
 
-    protected fun <T> singleActionOnRxIoMainThread(
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    open fun onDestroy() {
+        rxManager.clear()
+    }
+
+    fun <T> singleActionOnRxIoMainThread(
         actionDo: ((SingleEmitterProxy<T>) -> Unit),
         successAction: ((T) -> Unit)? = null,
         errorAction: ((Throwable) -> Unit)? = null,
         subscribeAction: ((DisposableProxy) -> Unit)? = null
     ) {
-        SingleCreate.create<T> {
-            actionDo(SingleEmitterProxy(it))
-        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : BasicRxSingleObserver<T>(rxManager) {
-
-                override fun onSubscribe(d: Disposable) {
-                    super.onSubscribe(d)
-                    subscribeAction?.invoke(DisposableProxy(d))
-                }
-
-                override fun onSuccess(data: T) {
-                    super.onSuccess(data)
-                    successAction?.invoke(data)
-                }
-
-                override fun onError(e: Throwable) {
-                    super.onError(e)
-                    errorAction?.invoke(e)
-                }
-            })
+        singleActionOnRxIoMainThread(
+            actionDo, successAction, errorAction, subscribeAction, rxManager
+        )
     }
 
-    protected fun <T> observeActionOnRxIoMainThread(
+    fun <T> observeActionOnRxIoMainThread(
         actionDo: ((ObservableEmitterProxy<T>) -> Unit),
         next: ((T) -> Unit)? = null,
         error: ((Throwable) -> Unit)? = null,
         complete: (() -> Unit)? = null,
         subscribe: ((DisposableProxy) -> Unit)? = null
     ) {
-        ObservableCreate.create(ObservableOnSubscribe<T> {
-            actionDo(ObservableEmitterProxy(it))
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : BasicRxObserver<T>(rxManager) {
-                override fun onSubscribe(d: Disposable) {
-                    super.onSubscribe(d)
-                    subscribe?.invoke(DisposableProxy(d))
-                }
-
-                override fun onNext(data: T) {
-                    next?.invoke(data)
-                }
-
-                override fun onComplete() {
-                    super.onComplete()
-                    complete?.invoke()
-                }
-
-                override fun onError(e: Throwable) {
-                    super.onError(e)
-                    error?.invoke(e)
-                }
-            })
+        observeActionOnRxIoMainThread(actionDo, next, error, complete, subscribe, rxManager)
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    open fun onDestroy() {
-        rxManager.clear()
+    companion object {
+        fun <T> singleActionOnRxIoMainThread(
+            actionDo: ((SingleEmitterProxy<T>) -> Unit),
+            successAction: ((T) -> Unit)? = null,
+            errorAction: ((Throwable) -> Unit)? = null,
+            subscribeAction: ((DisposableProxy) -> Unit)? = null,
+            rxManager: RxManager? = null
+        ) {
+            SingleCreate.create<T> {
+                actionDo(SingleEmitterProxy(it))
+            }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : BasicRxSingleObserver<T>(rxManager) {
+
+                    override fun onSubscribe(d: Disposable) {
+                        super.onSubscribe(d)
+                        subscribeAction?.invoke(DisposableProxy(d))
+                    }
+
+                    override fun onSuccess(data: T) {
+                        val isDisposed = disposable?.isDisposed
+                        super.onSuccess(data)
+                        if (isDisposed != true) {
+                            successAction?.invoke(data)
+                        }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        val isDisposed = disposable?.isDisposed
+                        super.onError(e)
+                        if (isDisposed != true) {
+                            errorAction?.invoke(e)
+                        }
+                    }
+                })
+        }
+
+        fun <T> observeActionOnRxIoMainThread(
+            actionDo: ((ObservableEmitterProxy<T>) -> Unit),
+            next: ((T) -> Unit)? = null,
+            error: ((Throwable) -> Unit)? = null,
+            complete: (() -> Unit)? = null,
+            subscribe: ((DisposableProxy) -> Unit)? = null,
+            rxManager: RxManager? = null
+        ) {
+            ObservableCreate.create(ObservableOnSubscribe<T> {
+                actionDo(ObservableEmitterProxy(it))
+            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : BasicRxObserver<T>(rxManager) {
+                    override fun onSubscribe(d: Disposable) {
+                        super.onSubscribe(d)
+                        subscribe?.invoke(DisposableProxy(d))
+                    }
+
+                    override fun onNext(data: T) {
+                        if (disposable?.isDisposed != true) {
+                            next?.invoke(data)
+                        }
+                    }
+
+                    override fun onComplete() {
+                        val isDisposed = disposable?.isDisposed
+                        super.onComplete()
+                        if (isDisposed != true) {
+                            complete?.invoke()
+                        }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        val isDisposed = disposable?.isDisposed
+                        super.onError(e)
+                        if (isDisposed != true) {
+                            error?.invoke(e)
+                        }
+                    }
+                })
+        }
     }
 
-    protected class SingleEmitterProxy<T>(private val emitter: SingleEmitter<T>) {
+    class SingleEmitterProxy<T>(private val emitter: SingleEmitter<T>) {
 
         fun onSuccess(t: T) = emitter.onSuccess(t)
         fun onError(t: Throwable) = emitter.onError(t)
@@ -115,7 +154,7 @@ open class BasicMvpModel(context: Context?) : LifecycleObserver {
         }
     }
 
-    protected class ObservableEmitterProxy<T>(private val emitter: ObservableEmitter<T>) {
+    class ObservableEmitterProxy<T>(private val emitter: ObservableEmitter<T>) {
         fun isDisposed(): Boolean = emitter.isDisposed
         fun tryOnError(t: Throwable): Boolean = emitter.tryOnError(t)
         fun onComplete() = emitter.onComplete()
