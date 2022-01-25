@@ -18,8 +18,6 @@ open class BasicRxSingleObserver<T>(private var rxManager: RxManager?) : SingleO
             add(disposable)
         }
     }
-
-
     override fun onError(e: Throwable) {
         rxManager?.remove(disposable)
     }

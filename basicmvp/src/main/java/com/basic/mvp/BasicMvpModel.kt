@@ -1,6 +1,5 @@
 package com.basic.mvp
 
-import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -21,15 +20,11 @@ import io.reactivex.rxjava3.schedulers.Schedulers
  *    @desc   :
  *    @version: 1.0
  */
-open class BasicMvpModel(context: Context?) : LifecycleObserver {
+open class BasicMvpModel(lifecycleOwner: LifecycleOwner?) : LifecycleObserver {
     protected val rxManager: RxManager = RxManager()
 
     init {
-        context?.run {
-            if (this is LifecycleOwner) {
-                lifecycle.addObserver(this@BasicMvpModel)
-            }
-        }
+        lifecycleOwner?.apply { lifecycle.addObserver(this@BasicMvpModel) }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)

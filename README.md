@@ -14,7 +14,7 @@
  Step 2. Add the dependency
  ```kotlin 
  	dependencies {
- 	        implementation 'com.github.ITDinasour:Basic-MVP:0.3.1'
+ 	        implementation 'com.github.ITDinasour:Basic-MVP:0.3.2'
          // implementation 'com.github.ITDinasour:Basic-WithViewBinding:0.1.2'//结合基础构建服务
  	}
 ```  
