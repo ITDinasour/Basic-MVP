@@ -22,8 +22,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
  *    @version: 1.0
  */
 open class BasicMvpModel(context: Context?) : LifecycleObserver {
-    protected val rxManager: RxManager =
-        RxManager()
+    protected val rxManager: RxManager = RxManager()
 
     init {
         context?.run {
@@ -78,19 +77,13 @@ open class BasicMvpModel(context: Context?) : LifecycleObserver {
                     }
 
                     override fun onSuccess(data: T) {
-                        val isDisposed = disposable?.isDisposed
                         super.onSuccess(data)
-                        if (isDisposed != true) {
-                            successAction?.invoke(data)
-                        }
+                        successAction?.invoke(data)
                     }
 
                     override fun onError(e: Throwable) {
-                        val isDisposed = disposable?.isDisposed
                         super.onError(e)
-                        if (isDisposed != true) {
-                            errorAction?.invoke(e)
-                        }
+                        errorAction?.invoke(e)
                     }
                 })
         }
@@ -119,19 +112,13 @@ open class BasicMvpModel(context: Context?) : LifecycleObserver {
                     }
 
                     override fun onComplete() {
-                        val isDisposed = disposable?.isDisposed
                         super.onComplete()
-                        if (isDisposed != true) {
-                            complete?.invoke()
-                        }
+                        complete?.invoke()
                     }
 
                     override fun onError(e: Throwable) {
-                        val isDisposed = disposable?.isDisposed
                         super.onError(e)
-                        if (isDisposed != true) {
-                            error?.invoke(e)
-                        }
+                        error?.invoke(e)
                     }
                 })
         }
